@@ -23,6 +23,13 @@ namespace HawkSoft.BetterAbilityBar {
 
     static Mod() {
       BuildLog.Info("Starting initialization.");
+      if (!HarmonyInjector.Injector.HarmonyInjected) {
+        BuildLog.Error("Cannot initialize: not currently in a Harmony-injected context.");
+        return;
+      }
+
+      BuildLog.Info("Creating local Harmony instance...");
+      harmony = HarmonyInstance.Create(ModID);
 
       try {
         // Begin applying patches.
@@ -46,7 +53,7 @@ namespace HawkSoft.BetterAbilityBar {
       }
     }
 
-    private static readonly HarmonyInstance harmony = HarmonyInstance.Create(ModID);
+    private static readonly HarmonyInstance harmony;
 
   }
 }
