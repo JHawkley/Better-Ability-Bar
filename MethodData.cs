@@ -39,7 +39,7 @@ namespace HawkSoft.BetterAbilityBar {
       public override string ToString() => "<MethodData.Empty>";
     }
 
-    public static IMethodData Empty = new EmptyMethodData();
+    public static readonly IMethodData Empty = new EmptyMethodData();
 
     public bool IsDefined => true;
 
