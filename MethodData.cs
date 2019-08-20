@@ -74,7 +74,8 @@ namespace HawkSoft.BetterAbilityBar {
       this.arity = arity;
     }
 
-    public MethodData(Type type, string method) : this(type, method, default(Type[])) {}
+    public MethodData(Type type, string method, bool arityZero = false)
+    : this(type, method, arityZero ? new Type[0] : default(Type[])) {}
 
     public override string ToString() {
       if (arity == null) return $"{type.FullName}::{method}";
