@@ -30,14 +30,7 @@ namespace HawkSoft.BetterAbilityBar {
       public const string FireEventDirect = "FireEventDirect";
       public const string BroadcastEvent = "BroadcastEvent";
       public const string Render = "Render";
-    }
-
-    /// <summary>
-    /// Constants for method-names that are the sources for the patches.
-    /// </summary>
-    public static class Sources {
-      public const string Prefix = "Prefix";
-      public const string Postfix = "Postfix";
+      public const string PlayerBody = "PlayerBody";
     }
 
   }

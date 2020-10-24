@@ -3,10 +3,11 @@
 <!--It is not intended to be used to build this project.-->
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>6</LangVersion>
     <QudPath Condition="Exists('C:\Program Files (x86)\Steam')">C:\Program Files (x86)\Steam\steamapps\common\Caves of Qud</QudPath>
     <QudPath Condition="!Exists('C:\Program Files (x86)\Steam')">C:\Program Files\Steam\steamapps\common\Caves of Qud</QudPath>
+    <QudPath Condition="!Exists('C:\Program Files\Steam')">$(HOME)\.local\share\Steam\steamapps\common\Caves of Qud</QudPath>
     <NoWarn>IDE0008,IDE0011,IDE0022,IDE0055,IDE0059,IDE0065,CS0164,CS0436</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -15,8 +16,7 @@
       $(AssemblySearchPaths);
       $(ReferencePath);
       $(ProjectPath);
-      $(QudPath)\CoQ_Data\Managed;
-      ..\Harmony Injector
+      $(QudPath)\CoQ_Data\Managed
     </AssemblySearchPaths>
   </PropertyGroup>
   <ItemGroup>

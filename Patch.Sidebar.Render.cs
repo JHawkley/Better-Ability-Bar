@@ -1,6 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
+using HarmonyLib;
 
 namespace HawkSoft.BetterAbilityBar {
 
@@ -16,6 +18,7 @@ namespace HawkSoft.BetterAbilityBar {
   /// <summary>
   /// Patches the `Sidebar` to re-render the ability text the way I want it after it is finished rendering.
   /// </summary>
+  [HarmonyPatch]
   public static class Patch_Sidebar_Render {
 
     public struct State {
@@ -23,18 +26,25 @@ namespace HawkSoft.BetterAbilityBar {
       public string originalText;
     }
 
-    public static IEnumerable<PatchData> Patches {
+    private static XRL.World.GameObject Sidebar_PlayerBody =>
+      Traverse.Create(typeof(Sidebar)).Field(Targets.PlayerBody).GetValue<XRL.World.GameObject>();
+    
+    private static bool ShouldRender {
       get {
-        var typePatch = typeof(Patch_Sidebar_Render);
-
-        yield return new PatchData(
-          new MethodData(typeof(Sidebar), Targets.Render, typeof(ScreenBuffer)),
-          new MethodData(typePatch, Sources.Prefix),
-          new MethodData(typePatch, Sources.Postfix)
-        );
+        if (GameManager.bDraw == 23) return false;
+        if (Keyboard.bAlt) return false;
+        if (GameManager.bDraw == 24) return false;
+        if (!MessageQueue.bShowUnityTopInfo) return false;
+        return true;
       }
     }
 
+    public static IEnumerable<MethodBase> TargetMethods()
+    {
+      yield return AccessTools.Method(typeof(Sidebar), Targets.Render, new Type[] { typeof(ScreenBuffer) });
+    }
+
+    [HarmonyPrefix]
     public static bool Prefix(out State __state) {
       // Okay, I have no idea...  It's a hell of a heisenbug.
       // Sometimes the `Postfix` will not complete.  No errors; it just stops and doesn't assign the new text I want.
@@ -48,15 +58,16 @@ namespace HawkSoft.BetterAbilityBar {
       // indicate we need to abort our render by setting `__state.shouldRender` to `false`.
 
       __state = new State {
-        shouldRender = GameManager.bDraw != 23 && !Keyboard.bAlt && GameManager.bDraw != 24 && MessageQueue.bShowUnityTopInfo,
+        shouldRender = ShouldRender,
         originalText = Sidebar.AbilityText
       };
       return true;
     }
 
-
+    [HarmonyPostfix]
     public static void Postfix(ref State __state) {
       if (!__state.shouldRender) return;
+      if (Sidebar_PlayerBody == null) return;
 
       // Omfg, this is so dumb.  I don't know who to blame.
       Sidebar.AbilityText = __state.originalText;

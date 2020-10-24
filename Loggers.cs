@@ -45,12 +45,12 @@ namespace HawkSoft.BetterAbilityBar {
   public static class BuildLog {
 
     public static void Info(string message) {
-      if (UseNewLogging) QudDebug.buildLog.Info(Format(message), EmptyArgs);
+      if (UseNewLogging) QudDebug.buildLog.Info(Format(message));
       else UnityDebug.Log(Format(message, "Info"));
     }
 
     public static void Error(string message) {
-      if (UseNewLogging) QudDebug.buildLog.Error(Format(message), EmptyArgs);
+      if (UseNewLogging) QudDebug.buildLog.Error(Format(message));
       else UnityDebug.LogError(Format(message, "Error"));
     }
 

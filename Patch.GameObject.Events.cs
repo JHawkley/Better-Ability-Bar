@@ -1,6 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
+using HarmonyLib;
 
 namespace HawkSoft.BetterAbilityBar {
 
@@ -14,27 +16,25 @@ namespace HawkSoft.BetterAbilityBar {
   /// Unfortunately, this seems to be the best hooking point I could find, as all abilities
   /// are executed through the global event system.
   /// </summary>
+  [HarmonyPatch]
   public static class Patch_GameObject_Events {
 
     public struct State {
       public string eventID;
     }
 
-    public static IEnumerable<PatchData> Patches {
-      get {
-        var typePatch = typeof(Patch_GameObject_Events);
-        var typeEvent = typeof(QudEvent);
-        
-        var methodPrefix = new MethodData(typePatch, Sources.Prefix);
-        var methodPostfix = new MethodData(typePatch, Sources.Postfix);
-        var builder = MethodData.Builder(typeof(QudGameObject));
+    public static IEnumerable<MethodBase> TargetMethods()
+    {
+      var typeGameObject = typeof(QudGameObject);
+      var typeEvent = typeof(QudEvent);
+      var arrParams = new Type[] { typeEvent };
 
-        yield return new PatchData(builder.Method(Targets.FireEvent, typeEvent), methodPrefix, methodPostfix);
-        yield return new PatchData(builder.Method(Targets.FireEventDirect, typeEvent), methodPrefix, methodPostfix);
-        yield return new PatchData(builder.Method(Targets.BroadcastEvent, typeEvent), methodPrefix, methodPostfix);
-      }
+      yield return AccessTools.Method(typeGameObject, Targets.FireEvent, arrParams);
+      yield return AccessTools.Method(typeGameObject, Targets.FireEventDirect, arrParams);
+      yield return AccessTools.Method(typeGameObject, Targets.BroadcastEvent, arrParams);
     }
 
+    [HarmonyPrefix]
     public static bool Prefix(out State __state, QudEvent E) {
       // Events can mutate under your nose, so I need to store the original event ID in case this `Event` instance
       // mysteriously changes into a different one.
@@ -42,6 +42,7 @@ namespace HawkSoft.BetterAbilityBar {
       return true;
     }
 
+    [HarmonyPostfix]
     public static void Postfix(QudGameObject __instance, State __state) {
       if (!__instance.IsPlayer()) return;
 
